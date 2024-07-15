@@ -4,6 +4,11 @@ import { v4 as uuidv4 } from "uuid";
 import { motion } from "framer-motion";
 
 const Grid = ({ arrFromProps }) => {
+  const [windowDimensions, setWindowDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
+
   const [arr, setArr] = useState([...arrFromProps]);
   const [activeCells, setActiveCells] = useState([]);
   const [isGameOver, setIsGameOver] = useState(false);
@@ -288,10 +293,25 @@ const Grid = ({ arrFromProps }) => {
     });
   }, [arr]);
 
+  useEffect(() => {
+    setWindowDimensions({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+    const handleResize = () => {
+      setWindowDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <>
       <div className="h-screen grid place-items-center container mx-auto">
-        <div className="bg-[#bbada0] relative rounded-xl grid grid-cols-4 grid-rows-4 p-4 gap-4">
+        <div className="bg-[#bbada0] relative rounded-xl grid grid-cols-4 grid-rows-4 p-4 gap-2 md:gap-4">
           {isGameOver && (
             <div className="gameOver absolute z-20 top-0 bg-white/50 left-0 w-full h-full grid place-items-center">
               <div className="flex flex-col items-center gap-4">
@@ -311,7 +331,7 @@ const Grid = ({ arrFromProps }) => {
               return (
                 <div
                   key={rowIndex + "" + index}
-                  className="w-24 h-24 bg-[#eee4da59] rounded-lg grid transition-all place-items-center font-bold"
+                  className="w-16 h-16 md:w-24 md:h-24 bg-[#eee4da59] rounded-lg grid transition-all place-items-center font-bold"
                 ></div>
               );
             });
@@ -320,9 +340,14 @@ const Grid = ({ arrFromProps }) => {
           {activeCells.map((item) => {
             let backgroundColor = "#eee4da59";
             let color = "#776e65";
-            let fontSize = "48px";
+            let fontSize = 48;
             let translateX = item.colIndex * 112;
             let translateY = item.rowIndex * 112;
+            if (windowDimensions.width < 768) {
+              translateX = item.colIndex * 72;
+              translateY = item.rowIndex * 72;
+              fontSize = 40;
+            }
             const initial = {
               x: translateX,
               y: translateY,
@@ -342,42 +367,42 @@ const Grid = ({ arrFromProps }) => {
               case 16:
                 backgroundColor = "#f69664";
                 color = "#f9f6f2";
-                fontSize = "44px";
+                fontSize = fontSize - 4;
                 break;
               case 32:
                 backgroundColor = "#f77c5f";
                 color = "#f9f6f2";
-                fontSize = "44px";
+                fontSize = fontSize - 4;
                 break;
               case 64:
                 backgroundColor = "#f75f3b";
                 color = "#f9f6f2";
-                fontSize = "44px";
+                fontSize = fontSize - 4;
                 break;
               case 128:
                 backgroundColor = "#edd073";
                 color = "#f9f6f2";
-                fontSize = "40px";
+                fontSize = fontSize - 10;
                 break;
               case 256:
                 backgroundColor = "#edd073";
                 color = "#f9f6f2";
-                fontSize = "40px";
+                fontSize = fontSize - 10;
                 break;
               case 512:
                 backgroundColor = "#edd073";
                 color = "#f9f6f2";
-                fontSize = "40px";
+                fontSize = fontSize - 10;
                 break;
               case 1024:
                 backgroundColor = "#edd073";
                 color = "#f9f6f2";
-                fontSize = "36px";
+                fontSize = fontSize - 16;
                 break;
               case 2048:
                 backgroundColor = "#edd073";
                 color = "#f9f6f2";
-                fontSize = "36px";
+                fontSize = fontSize - 16;
                 break;
               default:
                 break;
@@ -389,7 +414,7 @@ const Grid = ({ arrFromProps }) => {
                   style={{
                     backgroundColor,
                     color,
-                    fontSize,
+                    fontSize: fontSize + "px",
                   }}
                   initial={initial}
                   animate={{
@@ -405,7 +430,7 @@ const Grid = ({ arrFromProps }) => {
                       y: { duration: 0.1 },
                     },
                   }}
-                  className={`w-24 absolute z-10 left-4 top-4 h-24 rounded-lg grid place-items-center font-bold`}
+                  className={`md:w-24 w-16 h-16 absolute z-10 left-4 top-4 md:h-24 rounded-lg grid place-items-center font-bold`}
                 >
                   {item.value}
                 </motion.div>
