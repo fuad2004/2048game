@@ -7,3 +7,15 @@ body {
   color: rgb(119, 110, 101);
   background: rgb(250, 248, 239);
 }
+.gameOver {
+  animation: fadeShow 1000ms;
+}
+
+@keyframes fadeShow {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
