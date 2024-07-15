@@ -311,7 +311,7 @@ const Grid = ({ arrFromProps }) => {
   return (
     <>
       <div className="h-screen grid place-items-center container mx-auto">
-        <div className="bg-[#bbada0] overflow-scroll overscroll-contain relative rounded-xl grid grid-cols-4 grid-rows-4 p-4 gap-2 md:gap-4">
+        <div className="bg-[#bbada0] touch-none relative rounded-xl grid grid-cols-4 grid-rows-4 p-4 gap-2 md:gap-4">
           {isGameOver && (
             <div className="gameOver absolute z-20 top-0 bg-white/50 left-0 w-full h-full grid place-items-center">
               <div className="flex flex-col items-center gap-4">
