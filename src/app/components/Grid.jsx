@@ -227,10 +227,46 @@ const Grid = ({ arrFromProps }) => {
         restartGame();
       }
     }
+    let touchStartX = null;
+    let touchStartY = null;
+    let touchEndX = null;
+    let touchEndY = null;
+    function touchStartEvent(e) {
+      touchStartX = e.targetTouches[0].clientX;
+      touchStartY = e.targetTouches[0].clientY;
+    }
+    function touchEndEvent(e) {
+      touchEndX = e.changedTouches[0].clientX;
+      touchEndY = e.changedTouches[0].clientY;
+      if (
+        Math.abs(touchStartX - touchEndX) >= Math.abs(touchStartY - touchEndY)
+      ) {
+        if (touchStartX - touchEndX > 0) {
+          goLeft();
+          isGameOverFunc();
+        } else {
+          goRight();
+          isGameOverFunc();
+        }
+      } else {
+        if (touchStartY - touchEndY > 0) {
+          goTop();
+          isGameOverFunc();
+        } else {
+          goBottom();
+          isGameOverFunc();
+        }
+      }
+    }
+
     window.addEventListener("keydown", keyDownEvent);
+    window.addEventListener("touchstart", touchStartEvent);
+    window.addEventListener("touchend", touchEndEvent);
 
     return () => {
       window.removeEventListener("keydown", keyDownEvent);
+      window.removeEventListener("touchstart", touchStartEvent);
+      window.removeEventListener("touchend", touchEndEvent);
     };
   }, [arr]);
 
@@ -332,6 +368,16 @@ const Grid = ({ arrFromProps }) => {
                 backgroundColor = "#edd073";
                 color = "#f9f6f2";
                 fontSize = "40px";
+                break;
+              case 1024:
+                backgroundColor = "#edd073";
+                color = "#f9f6f2";
+                fontSize = "36px";
+                break;
+              case 2048:
+                backgroundColor = "#edd073";
+                color = "#f9f6f2";
+                fontSize = "36px";
                 break;
               default:
                 break;
