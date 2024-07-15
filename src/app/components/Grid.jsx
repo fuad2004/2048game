@@ -1,22 +1,36 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
+import { motion } from "framer-motion";
 
 const Grid = ({ arrFromProps }) => {
   const [arr, setArr] = useState([...arrFromProps]);
+  const [activeCells, setActiveCells] = useState([]);
   const [isGameOver, setIsGameOver] = useState(false);
 
   function getRowLeft(arr) {
     let temp = -2;
-    arr.forEach((_, index) => {
+    arr.forEach((item, index) => {
+      item.isNew = false;
       if (index != 0) {
         for (let i = index - 1; i >= 0; i--) {
-          if (arr[i] == 0 && arr[i + 1] != undefined) {
+          if (
+            arr[i].value == 0 &&
+            arr[i + 1] != undefined &&
+            arr[i + 1].value != 0
+          ) {
             arr[i] = arr[i + 1];
-            arr[i + 1] = 0;
-          } else if (arr[i] == arr[i + 1] && temp != i) {
+            arr[i + 1] = { value: 0, id: null, isNew: null };
+          } else if (
+            arr[i].value == arr[i + 1].value &&
+            arr[i].value != 0 &&
+            temp != i
+          ) {
             temp = i;
-            arr[i] = arr[i] + arr[i + 1];
-            arr[i + 1] = 0;
+            arr[i].value = arr[i].value + arr[i + 1].value;
+            arr[i].id = uuidv4();
+            arr[i].isNew = true;
+            arr[i + 1] = { value: 0, id: null, isNew: null };
             break;
           } else {
             break;
@@ -121,7 +135,7 @@ const Grid = ({ arrFromProps }) => {
     const emptyTiles = [];
     arr.forEach((row, rowIndex) => {
       row.forEach((item, colIndex) => {
-        if (item == 0) {
+        if (item.value == 0) {
           emptyTiles.push([rowIndex, colIndex]);
         }
       });
@@ -131,9 +145,17 @@ const Grid = ({ arrFromProps }) => {
       const randomTile =
         emptyTiles[Math.floor(Math.random() * emptyTilesLength)];
       if (Math.floor(Math.random() * 10) == 9) {
-        arr[randomTile[0]][randomTile[1]] = 4;
+        arr[randomTile[0]][randomTile[1]] = {
+          value: 4,
+          id: uuidv4(),
+          isNew: true,
+        };
       } else {
-        arr[randomTile[0]][randomTile[1]] = 2;
+        arr[randomTile[0]][randomTile[1]] = {
+          value: 2,
+          id: uuidv4(),
+          isNew: true,
+        };
       }
     }
     return arr;
@@ -142,7 +164,7 @@ const Grid = ({ arrFromProps }) => {
   function restartGame() {
     const arr = [];
     for (let i = 0; i < 4; i++) {
-      arr.push(new Array(4).fill(0));
+      arr.push(new Array(4).fill({ value: 0, id: null }));
     }
     let newArr = setNewTile(arr);
     let newArrV2 = setNewTile(newArr);
@@ -156,7 +178,7 @@ const Grid = ({ arrFromProps }) => {
 
       arr.forEach((row) => {
         row.forEach((item) => {
-          if (item == 0) {
+          if (item.value == 0) {
             isFull = false;
           }
         });
@@ -167,12 +189,12 @@ const Grid = ({ arrFromProps }) => {
         row.forEach((_, colIndex) => {
           if (
             arr[rowIndex][colIndex + 1] != undefined &&
-            arr[rowIndex][colIndex] == arr[rowIndex][colIndex + 1]
+            arr[rowIndex][colIndex].value == arr[rowIndex][colIndex + 1].value
           ) {
             isSimilar = false;
           } else if (
             arr.length >= rowIndex + 2 &&
-            arr[rowIndex][colIndex] == arr[rowIndex + 1][colIndex]
+            arr[rowIndex][colIndex].value == arr[rowIndex + 1][colIndex].value
           ) {
             isSimilar = false;
           }
@@ -212,12 +234,30 @@ const Grid = ({ arrFromProps }) => {
     };
   }, [arr]);
 
+  useEffect(() => {
+    const tempActiveCells = [];
+    arr.forEach((row, rowIndex) => {
+      row.forEach((item, colIndex) => {
+        if (item.value != 0) {
+          tempActiveCells.push({
+            value: item.value,
+            id: item.id,
+            rowIndex,
+            colIndex,
+            isNew: item.isNew,
+          });
+        }
+      });
+      setActiveCells(tempActiveCells);
+    });
+  }, [arr]);
+
   return (
     <>
       <div className="h-screen grid place-items-center container mx-auto">
-        <div className="bg-[#bbada0] relative rounded-md grid grid-cols-4 grid-rows-4 p-4 gap-4">
+        <div className="bg-[#bbada0] relative rounded-xl grid grid-cols-4 grid-rows-4 p-4 gap-4">
           {isGameOver && (
-            <div className="gameOver absolute top-0 bg-white/50 left-0 w-full h-full grid place-items-center">
+            <div className="gameOver absolute z-20 top-0 bg-white/50 left-0 w-full h-full grid place-items-center">
               <div className="flex flex-col items-center gap-4">
                 <div className="text-6xl font-semibold">Game Over!</div>
                 <button
@@ -229,75 +269,102 @@ const Grid = ({ arrFromProps }) => {
               </div>
             </div>
           )}
+
           {arr.map((row, rowIndex) => {
-            return row.map((item, index) => {
-              let backgroundColor = "#eee4da59";
-              let color = "#776e65";
-              let fontSize = "48px";
-              switch (item) {
-                case 2:
-                  backgroundColor = "#eee4da";
-                  break;
-                case 4:
-                  backgroundColor = "#eee1c9";
-                  break;
-                case 8:
-                  backgroundColor = "#f3b27a";
-                  color = "#f9f6f2";
-                  break;
-                case 16:
-                  backgroundColor = "#f69664";
-                  color = "#f9f6f2";
-                  fontSize = "44px";
-                  break;
-                case 32:
-                  backgroundColor = "#f77c5f";
-                  color = "#f9f6f2";
-                  fontSize = "44px";
-                  break;
-                case 64:
-                  backgroundColor = "#f75f3b";
-                  color = "#f9f6f2";
-                  fontSize = "44px";
-                  break;
-                case 128:
-                  backgroundColor = "#edd073";
-                  color = "#f9f6f2";
-                  fontSize = "40px";
-                  break;
-                case 256:
-                  backgroundColor = "#edd073";
-                  color = "#f9f6f2";
-                  fontSize = "40px";
-                  break;
-                case 512:
-                  backgroundColor = "#edd073";
-                  color = "#f9f6f2";
-                  fontSize = "40px";
-                  break;
-                default:
-                  break;
-              }
-              if (item != 0) {
-                return (
-                  <div
-                    key={rowIndex + "" + index}
-                    style={{ backgroundColor, color, fontSize }}
-                    className="w-24 h-24 rounded grid place-items-center font-bold"
-                  >
-                    {item}
-                  </div>
-                );
-              } else {
-                return (
-                  <div
-                    key={rowIndex + "" + index}
-                    style={{ backgroundColor, color, fontSize }}
-                    className="w-24 h-24 rounded grid place-items-center font-bold"
-                  ></div>
-                );
-              }
+            return row.map((_, index) => {
+              return (
+                <div
+                  key={rowIndex + "" + index}
+                  className="w-24 h-24 bg-[#eee4da59] rounded-lg grid transition-all place-items-center font-bold"
+                ></div>
+              );
             });
+          })}
+
+          {activeCells.map((item) => {
+            let backgroundColor = "#eee4da59";
+            let color = "#776e65";
+            let fontSize = "48px";
+            let translateX = item.colIndex * 112;
+            let translateY = item.rowIndex * 112;
+            const initial = {
+              x: translateX,
+              y: translateY,
+            };
+            let scaleDuration = item.isNew ? 0.4 : 0.2;
+            switch (item.value) {
+              case 2:
+                backgroundColor = "#eee4da";
+                break;
+              case 4:
+                backgroundColor = "#eee1c9";
+                break;
+              case 8:
+                backgroundColor = "#f3b27a";
+                color = "#f9f6f2";
+                break;
+              case 16:
+                backgroundColor = "#f69664";
+                color = "#f9f6f2";
+                fontSize = "44px";
+                break;
+              case 32:
+                backgroundColor = "#f77c5f";
+                color = "#f9f6f2";
+                fontSize = "44px";
+                break;
+              case 64:
+                backgroundColor = "#f75f3b";
+                color = "#f9f6f2";
+                fontSize = "44px";
+                break;
+              case 128:
+                backgroundColor = "#edd073";
+                color = "#f9f6f2";
+                fontSize = "40px";
+                break;
+              case 256:
+                backgroundColor = "#edd073";
+                color = "#f9f6f2";
+                fontSize = "40px";
+                break;
+              case 512:
+                backgroundColor = "#edd073";
+                color = "#f9f6f2";
+                fontSize = "40px";
+                break;
+              default:
+                break;
+            }
+            if (item.value != 0) {
+              return (
+                <motion.div
+                  key={item.id}
+                  style={{
+                    backgroundColor,
+                    color,
+                    fontSize,
+                  }}
+                  initial={initial}
+                  animate={{
+                    x: translateX,
+                    y: translateY,
+                    scale: [0.8, 1.1, 1],
+                    transition: {
+                      scale: {
+                        duration: scaleDuration,
+                        ease: "easeIn",
+                      },
+                      x: { duration: 0.1 },
+                      y: { duration: 0.1 },
+                    },
+                  }}
+                  className={`w-24 absolute z-10 left-4 top-4 h-24 rounded-lg grid place-items-center font-bold`}
+                >
+                  {item.value}
+                </motion.div>
+              );
+            }
           })}
         </div>
       </div>
