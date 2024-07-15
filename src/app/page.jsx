@@ -21,8 +21,7 @@ export default function Home() {
     });
     const emptyTilesLength = emptyTiles.length;
     if (emptyTilesLength != 0) {
-      const randomTile =
-        emptyTiles[Math.floor(Math.random() * emptyTilesLength)];
+      const randomTile = emptyTiles[Math.floor(Math.random() * emptyTilesLength)];
       if (Math.floor(Math.random() * 10) == 9) {
         arr[randomTile[0]][randomTile[1]] = {
           value: 4,

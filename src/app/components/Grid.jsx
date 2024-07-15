@@ -12,6 +12,7 @@ const Grid = ({ arrFromProps }) => {
   const [arr, setArr] = useState([...arrFromProps]);
   const [activeCells, setActiveCells] = useState([]);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [isUserWin, setIsUserWin] = useState(false);
 
   function getRowLeft(arr) {
     let temp = -2;
@@ -19,18 +20,10 @@ const Grid = ({ arrFromProps }) => {
       item.isNew = false;
       if (index != 0) {
         for (let i = index - 1; i >= 0; i--) {
-          if (
-            arr[i].value == 0 &&
-            arr[i + 1] != undefined &&
-            arr[i + 1].value != 0
-          ) {
+          if (arr[i].value == 0 && arr[i + 1] != undefined && arr[i + 1].value != 0) {
             arr[i] = arr[i + 1];
             arr[i + 1] = { value: 0, id: null, isNew: null };
-          } else if (
-            arr[i].value == arr[i + 1].value &&
-            arr[i].value != 0 &&
-            temp != i
-          ) {
+          } else if (arr[i].value == arr[i + 1].value && arr[i].value != 0 && temp != i) {
             temp = i;
             arr[i].value = arr[i].value + arr[i + 1].value;
             arr[i].id = uuidv4();
@@ -147,8 +140,7 @@ const Grid = ({ arrFromProps }) => {
     });
     const emptyTilesLength = emptyTiles.length;
     if (emptyTilesLength != 0) {
-      const randomTile =
-        emptyTiles[Math.floor(Math.random() * emptyTilesLength)];
+      const randomTile = emptyTiles[Math.floor(Math.random() * emptyTilesLength)];
       if (Math.floor(Math.random() * 10) == 9) {
         arr[randomTile[0]][randomTile[1]] = {
           value: 4,
@@ -175,6 +167,7 @@ const Grid = ({ arrFromProps }) => {
     let newArrV2 = setNewTile(newArr);
     setArr(newArrV2);
     setIsGameOver(false);
+    setIsUserWin(false);
   }
 
   function isGameOverFunc() {
@@ -192,15 +185,15 @@ const Grid = ({ arrFromProps }) => {
       let isSimilar = true;
       arr.forEach((row, rowIndex) => {
         row.forEach((_, colIndex) => {
+          if (arr[rowIndex][colIndex].value == 2048) {
+            setIsUserWin(true);
+          }
           if (
             arr[rowIndex][colIndex + 1] != undefined &&
             arr[rowIndex][colIndex].value == arr[rowIndex][colIndex + 1].value
           ) {
             isSimilar = false;
-          } else if (
-            arr.length >= rowIndex + 2 &&
-            arr[rowIndex][colIndex].value == arr[rowIndex + 1][colIndex].value
-          ) {
+          } else if (arr.length >= rowIndex + 2 && arr[rowIndex][colIndex].value == arr[rowIndex + 1][colIndex].value) {
             isSimilar = false;
           }
         });
@@ -243,9 +236,7 @@ const Grid = ({ arrFromProps }) => {
     function touchEndEvent(e) {
       touchEndX = e.changedTouches[0].clientX;
       touchEndY = e.changedTouches[0].clientY;
-      if (
-        Math.abs(touchStartX - touchEndX) >= Math.abs(touchStartY - touchEndY)
-      ) {
+      if (Math.abs(touchStartX - touchEndX) >= Math.abs(touchStartY - touchEndY)) {
         if (touchStartX - touchEndX > 0) {
           goLeft();
           isGameOverFunc();
@@ -315,14 +306,23 @@ const Grid = ({ arrFromProps }) => {
           {isGameOver && (
             <div className="gameOver absolute z-20 top-0 bg-white/50 left-0 w-full h-full grid place-items-center">
               <div className="flex flex-col items-center gap-4">
-                <div className="text-3xl md:text-6xl font-semibold">
-                  Game Over!
-                </div>
+                <div className="text-3xl md:text-6xl font-semibold">Game Over!</div>
                 <button
                   onClick={restartGame}
-                  className="text-xl text-white w-fit hover:bg-[#776555] bg-[#8f7a66] font-semibold rounded py-1 px-4"
-                >
+                  className="text-xl text-white w-fit hover:bg-[#776555] bg-[#8f7a66] font-semibold rounded py-1 px-4">
                   Try again
+                </button>
+              </div>
+            </div>
+          )}
+          {isUserWin && (
+            <div className="gameOver absolute z-30 top-0 bg-white/50 left-0 w-full h-full grid place-items-center">
+              <div className="flex flex-col items-center gap-4">
+                <div className="text-xl text-center md:text-4xl font-semibold">You Won! Congratulations</div>
+                <button
+                  onClick={restartGame}
+                  className="text-xl text-white w-fit hover:bg-[#776555] bg-[#8f7a66] font-semibold rounded py-1 px-4">
+                  Play Again
                 </button>
               </div>
             </div>
@@ -333,8 +333,7 @@ const Grid = ({ arrFromProps }) => {
               return (
                 <div
                   key={rowIndex + "" + index}
-                  className="w-16 h-16 md:w-24 md:h-24 bg-[#eee4da59] rounded-lg grid transition-all place-items-center font-bold"
-                ></div>
+                  className="w-16 h-16 md:w-24 md:h-24 bg-[#eee4da59] rounded-lg grid transition-all place-items-center font-bold"></div>
               );
             });
           })}
@@ -432,8 +431,7 @@ const Grid = ({ arrFromProps }) => {
                       y: { duration: 0.1 },
                     },
                   }}
-                  className={`md:w-24 w-16 h-16 absolute z-10 left-4 top-4 md:h-24 rounded-lg grid place-items-center font-bold`}
-                >
+                  className={`md:w-24 w-16 h-16 absolute z-10 left-4 top-4 md:h-24 rounded-lg grid place-items-center font-bold`}>
                   {item.value}
                 </motion.div>
               );
