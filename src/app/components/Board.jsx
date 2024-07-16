@@ -7,8 +7,10 @@ import GameOver from "./GameOver";
 import YouWin from "./YouWin";
 import EmptyCells from "./EmptyCells";
 import { getStyles } from "@/app/helper";
+import Score from "./Score";
+import NewGame from "./NewGame";
 
-const Grid = () => {
+const Board = () => {
   const windowDimensions = useWindowDimensions();
 
   const firstArr = [];
@@ -18,7 +20,9 @@ const Grid = () => {
   const [arr, setArr] = useState(firstArr);
   const [activeCells, setActiveCells] = useState([]);
   const [isGameOver, setIsGameOver] = useState(false);
-  const [isUserWin, setIsUserWin] = useState(false);
+  const [isUserWin, setIsUserWin] = useState({ limit: 2048, isWin: false });
+  const [score, setScore] = useState(0);
+  const [bestScore, setBestScore] = useState(0);
 
   function getRowLeft(arr) {
     let temp = -2;
@@ -39,6 +43,7 @@ const Grid = () => {
           ) {
             temp = i;
             arr[i].value = arr[i].value + arr[i + 1].value;
+            setScore((prevValue) => prevValue + arr[i].value);
             arr[i].id = uuidv4();
             arr[i + 1] = { value: 0, id: null };
             break;
@@ -189,7 +194,8 @@ const Grid = () => {
     setNewTile();
     setNewTile();
     setIsGameOver(false);
-    setIsUserWin(false);
+    setIsUserWin({ limit: 2048, isWin: false });
+    setScore(0);
   }
 
   function isGameOverFunc() {
@@ -207,8 +213,8 @@ const Grid = () => {
       let isSimilar = true;
       arr.forEach((row, rowIndex) => {
         row.forEach((_, colIndex) => {
-          if (arr[rowIndex][colIndex].value == 2048) {
-            setIsUserWin(true);
+          if (arr[rowIndex][colIndex].value == isUserWin.limit) {
+            setIsUserWin({ limit: isUserWin.limit, isWin: true });
           }
           if (
             arr[rowIndex][colIndex + 1] != undefined &&
@@ -284,7 +290,7 @@ const Grid = () => {
       }
     }
 
-    if (isUserWin == false && isGameOver == false) {
+    if (isUserWin.isWin == false && isGameOver == false) {
       window.addEventListener("keydown", keyDownEvent);
       board.addEventListener("touchstart", touchStartEvent);
       board.addEventListener("touchend", touchEndEvent);
@@ -310,21 +316,44 @@ const Grid = () => {
       board.removeEventListener("touchstart", touchStartEvent);
       board.removeEventListener("touchend", touchEndEvent);
     };
-  }, [arr]);
+  }, [arr, isGameOver, isUserWin]);
 
   useLayoutEffect(() => {
     restartGame();
+    const bestScore = localStorage.getItem("bestScore");
+    if (bestScore != undefined) {
+      setBestScore(bestScore);
+    }
   }, []);
+
+  useLayoutEffect(() => {
+    const bestScore = localStorage.getItem("bestScore");
+    if (bestScore == undefined) {
+      localStorage.setItem("bestScore", 0);
+      setBestScore(0);
+    } else {
+      if (score > bestScore) {
+        localStorage.setItem("bestScore", score);
+        setBestScore(score);
+      }
+    }
+  }, [score]);
 
   return (
     <>
-      <div className="h-screen grid place-items-center container mx-auto">
+      <div className="h-screen flex flex-col w-fit mx-auto px-4 py-10">
+        <Score score={score} bestScore={bestScore} />
+        <div className="mb-10"></div>
+        <NewGame restartGame={restartGame} />
+        <div className="mb-6"></div>
         <div
           id="board"
-          className="bg-[#bbada0] touch-none relative rounded-xl grid grid-cols-4 grid-rows-4 p-4 gap-2 md:gap-4"
+          className="bg-[#bbada0] min-w-max touch-none relative rounded-xl h-fit w-fit grid grid-cols-4 grid-rows-4 p-4 gap-2 md:gap-4"
         >
           {isGameOver && <GameOver restartGame={restartGame} />}
-          {isUserWin && <YouWin restartGame={restartGame} />}
+          {isUserWin.isWin && (
+            <YouWin restartGame={restartGame} setIsUserWin={setIsUserWin} />
+          )}
 
           <EmptyCells arr={arr} />
 
@@ -337,17 +366,16 @@ const Grid = () => {
               translateX = item.colIndex * 72;
               translateY = item.rowIndex * 72;
             }
-            const initial = {
-              x: translateX,
-              y: translateY,
-            };
 
             if (item.value != 0) {
               return (
                 <motion.div
                   key={item.id}
                   style={styles}
-                  initial={initial}
+                  initial={{
+                    x: translateX,
+                    y: translateY,
+                  }}
                   animate={{
                     x: translateX,
                     y: translateY,
@@ -374,4 +402,4 @@ const Grid = () => {
   );
 };
 
-export default Grid;
+export default Board;

@@ -57,6 +57,9 @@ export function getStyles(value, width) {
       fontSize = fontSize - 16;
       break;
     default:
+      backgroundColor = "#edd073";
+      color = "#f9f6f2";
+      fontSize = fontSize - 20;
       break;
   }
   fontSize += "px";

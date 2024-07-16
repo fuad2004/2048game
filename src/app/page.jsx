@@ -1,9 +1,9 @@
-import Grid from "./components/Grid";
+import Board from "./components/Board";
 
 export default function Home() {
   return (
     <div>
-      <Grid />
+      <Board />
     </div>
   );
 }
