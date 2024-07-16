@@ -1,16 +1,21 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { motion } from "framer-motion";
 import useWindowDimensions from "../hooks/windowDimensions";
 import GameOver from "./GameOver";
 import YouWin from "./YouWin";
 import EmptyCells from "./EmptyCells";
+import { getStyles } from "@/app/helper";
 
 const Grid = () => {
   const windowDimensions = useWindowDimensions();
 
-  const [arr, setArr] = useState([]);
+  const firstArr = [];
+  for (let i = 0; i < 4; i++) {
+    firstArr.push(new Array(4).fill({ value: 0, id: null }));
+  }
+  const [arr, setArr] = useState(firstArr);
   const [activeCells, setActiveCells] = useState([]);
   const [isGameOver, setIsGameOver] = useState(false);
   const [isUserWin, setIsUserWin] = useState(false);
@@ -227,76 +232,9 @@ const Grid = () => {
     });
   }
 
-  function getStyles(value) {
-    let fontSize = 48;
-    if (windowDimensions.width < 768) {
-      fontSize = 40;
-    }
-    let backgroundColor = "#eee4da59";
-    let color = "#776e65";
-    switch (value) {
-      case 2:
-        backgroundColor = "#eee4da";
-        break;
-      case 4:
-        backgroundColor = "#eee1c9";
-        break;
-      case 8:
-        backgroundColor = "#f3b27a";
-        color = "#f9f6f2";
-        break;
-      case 16:
-        backgroundColor = "#f69664";
-        color = "#f9f6f2";
-        fontSize = fontSize - 4;
-        break;
-      case 32:
-        backgroundColor = "#f77c5f";
-        color = "#f9f6f2";
-        fontSize = fontSize - 4;
-        break;
-      case 64:
-        backgroundColor = "#f75f3b";
-        color = "#f9f6f2";
-        fontSize = fontSize - 4;
-        break;
-      case 128:
-        backgroundColor = "#edd073";
-        color = "#f9f6f2";
-        fontSize = fontSize - 10;
-        break;
-      case 256:
-        backgroundColor = "#edd073";
-        color = "#f9f6f2";
-        fontSize = fontSize - 10;
-        break;
-      case 512:
-        backgroundColor = "#edd073";
-        color = "#f9f6f2";
-        fontSize = fontSize - 10;
-        break;
-      case 1024:
-        backgroundColor = "#edd073";
-        color = "#f9f6f2";
-        fontSize = fontSize - 16;
-        break;
-      case 2048:
-        backgroundColor = "#edd073";
-        color = "#f9f6f2";
-        fontSize = fontSize - 16;
-        break;
-      default:
-        break;
-    }
-    fontSize += "px";
-    return {
-      backgroundColor,
-      color,
-      fontSize,
-    };
-  }
-
   useEffect(() => {
+    const board = document.getElementById("board");
+
     function keyDownEvent(e) {
       if (e.code == "ArrowUp") {
         goTop();
@@ -310,7 +248,7 @@ const Grid = () => {
       } else if (e.code == "ArrowLeft") {
         goLeft();
         isGameOverFunc();
-      } else if (e.code == "KeyR") {
+      } else if (e.code == "KeyR" && !e.ctrlKey) {
         restartGame();
       }
     }
@@ -348,8 +286,8 @@ const Grid = () => {
 
     if (isUserWin == false && isGameOver == false) {
       window.addEventListener("keydown", keyDownEvent);
-      window.addEventListener("touchstart", touchStartEvent);
-      window.addEventListener("touchend", touchEndEvent);
+      board.addEventListener("touchstart", touchStartEvent);
+      board.addEventListener("touchend", touchEndEvent);
     }
 
     const tempActiveCells = [];
@@ -369,26 +307,29 @@ const Grid = () => {
 
     return () => {
       window.removeEventListener("keydown", keyDownEvent);
-      window.removeEventListener("touchstart", touchStartEvent);
-      window.removeEventListener("touchend", touchEndEvent);
+      board.removeEventListener("touchstart", touchStartEvent);
+      board.removeEventListener("touchend", touchEndEvent);
     };
   }, [arr]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     restartGame();
   }, []);
 
   return (
     <>
       <div className="h-screen grid place-items-center container mx-auto">
-        <div className="bg-[#bbada0] touch-none relative rounded-xl grid grid-cols-4 grid-rows-4 p-4 gap-2 md:gap-4">
+        <div
+          id="board"
+          className="bg-[#bbada0] touch-none relative rounded-xl grid grid-cols-4 grid-rows-4 p-4 gap-2 md:gap-4"
+        >
           {isGameOver && <GameOver restartGame={restartGame} />}
           {isUserWin && <YouWin restartGame={restartGame} />}
 
           <EmptyCells arr={arr} />
 
           {activeCells.map((item) => {
-            const styles = getStyles(item.value);
+            const styles = getStyles(item.value, windowDimensions.width);
 
             let translateX = item.colIndex * 112;
             let translateY = item.rowIndex * 112;
