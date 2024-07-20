@@ -9,13 +9,16 @@ import EmptyCells from "./EmptyCells";
 import { getStyles } from "@/app/helper";
 import Score from "./Score";
 import NewGame from "./NewGame";
+import SetGridCellsNum from "./SetGridCellsNum";
+import ArrowKeysUi from "./ArrowKeysUi";
 
 const Board = () => {
+  const [cellsNum, setCellsNum] = useState(4);
   const windowDimensions = useWindowDimensions();
 
   const firstArr = [];
-  for (let i = 0; i < 4; i++) {
-    firstArr.push(new Array(4).fill({ value: 0, id: null }));
+  for (let i = 0; i < cellsNum; i++) {
+    firstArr.push(new Array(cellsNum).fill({ value: 0, id: null }));
   }
   const [arr, setArr] = useState(firstArr);
   const [activeCells, setActiveCells] = useState([]);
@@ -29,18 +32,10 @@ const Board = () => {
     arr.forEach((_, index) => {
       if (index != 0) {
         for (let i = index - 1; i >= 0; i--) {
-          if (
-            arr[i].value == 0 &&
-            arr[i + 1] != undefined &&
-            arr[i + 1].value != 0
-          ) {
+          if (arr[i].value == 0 && arr[i + 1] != undefined && arr[i + 1].value != 0) {
             arr[i] = arr[i + 1];
             arr[i + 1] = { value: 0, id: null };
-          } else if (
-            arr[i].value == arr[i + 1].value &&
-            arr[i].value != 0 &&
-            temp != i
-          ) {
+          } else if (arr[i].value == arr[i + 1].value && arr[i].value != 0 && temp != i) {
             temp = i;
             arr[i].value = arr[i].value + arr[i + 1].value;
             setScore((prevValue) => prevValue + arr[i].value);
@@ -167,8 +162,7 @@ const Board = () => {
       });
       const emptyTilesLength = emptyTiles.length;
       if (emptyTilesLength != 0) {
-        const randomTile =
-          emptyTiles[Math.floor(Math.random() * emptyTilesLength)];
+        const randomTile = emptyTiles[Math.floor(Math.random() * emptyTilesLength)];
         if (Math.floor(Math.random() * 10) == 9) {
           tempArr[randomTile[0]][randomTile[1]] = {
             value: 4,
@@ -187,8 +181,8 @@ const Board = () => {
 
   function restartGame() {
     const arr = [];
-    for (let i = 0; i < 4; i++) {
-      arr.push(new Array(4).fill({ value: 0, id: null }));
+    for (let i = 0; i < cellsNum; i++) {
+      arr.push(new Array(cellsNum).fill({ value: 0, id: null }));
     }
     setArr(arr);
     setNewTile();
@@ -221,10 +215,7 @@ const Board = () => {
             arr[rowIndex][colIndex].value == arr[rowIndex][colIndex + 1].value
           ) {
             isSimilar = false;
-          } else if (
-            arr.length >= rowIndex + 2 &&
-            arr[rowIndex][colIndex].value == arr[rowIndex + 1][colIndex].value
-          ) {
+          } else if (arr.length >= rowIndex + 2 && arr[rowIndex][colIndex].value == arr[rowIndex + 1][colIndex].value) {
             isSimilar = false;
           }
         });
@@ -254,6 +245,18 @@ const Board = () => {
       } else if (e.code == "ArrowLeft") {
         goLeft();
         isGameOverFunc();
+      } else if (e.code == "KeyW") {
+        goTop();
+        isGameOverFunc();
+      } else if (e.code == "KeyS") {
+        goBottom();
+        isGameOverFunc();
+      } else if (e.code == "KeyA") {
+        goLeft();
+        isGameOverFunc();
+      } else if (e.code == "KeyD") {
+        goRight();
+        isGameOverFunc();
       } else if (e.code == "KeyR" && !e.ctrlKey) {
         restartGame();
       }
@@ -269,9 +272,7 @@ const Board = () => {
     function touchEndEvent(e) {
       touchEndX = e.changedTouches[0].clientX;
       touchEndY = e.changedTouches[0].clientY;
-      if (
-        Math.abs(touchStartX - touchEndX) >= Math.abs(touchStartY - touchEndY)
-      ) {
+      if (Math.abs(touchStartX - touchEndX) >= Math.abs(touchStartY - touchEndY)) {
         if (touchStartX - touchEndX > 0) {
           goLeft();
           isGameOverFunc();
@@ -339,21 +340,27 @@ const Board = () => {
     }
   }, [score]);
 
+  useLayoutEffect(() => {
+    restartGame();
+  }, [cellsNum]);
+
   return (
     <>
-      <div className="h-screen flex flex-col w-fit mx-auto px-4 py-10">
+      <div className="flex flex-col w-fit mx-auto px-4 py-10">
+        <SetGridCellsNum cellsNum={cellsNum} setCellsNum={setCellsNum} />
         <Score score={score} bestScore={bestScore} />
         <div className="mb-10"></div>
         <NewGame restartGame={restartGame} />
         <div className="mb-6"></div>
         <div
           id="board"
-          className="bg-[#bbada0] min-w-max touch-none relative rounded-xl h-fit w-fit grid grid-cols-4 grid-rows-4 p-4 gap-2 md:gap-4"
-        >
+          style={{
+            gridTemplateColumns: `repeat(${cellsNum},minmax(0,1fr))`,
+            gridTemplateRows: `repeat(${cellsNum},minmax(0,1fr))`,
+          }}
+          className="bg-[#bbada0] min-w-max touch-none relative rounded-xl h-fit w-fit grid p-4 gap-2 md:gap-4">
           {isGameOver && <GameOver restartGame={restartGame} />}
-          {isUserWin.isWin && (
-            <YouWin restartGame={restartGame} setIsUserWin={setIsUserWin} />
-          )}
+          {isUserWin.isWin && <YouWin restartGame={restartGame} setIsUserWin={setIsUserWin} />}
 
           <EmptyCells arr={arr} />
 
@@ -389,14 +396,14 @@ const Board = () => {
                       y: { duration: 0.1 },
                     },
                   }}
-                  className={`md:w-24 w-16 h-16 absolute z-10 left-4 top-4 md:h-24 rounded-lg grid place-items-center font-bold`}
-                >
+                  className={`md:w-24 w-16 h-16 absolute z-10 left-4 top-4 md:h-24 rounded-lg grid place-items-center font-bold`}>
                   {item.value}
                 </motion.div>
               );
             }
           })}
         </div>
+        <ArrowKeysUi />
       </div>
     </>
   );
