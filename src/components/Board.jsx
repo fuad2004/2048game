@@ -233,6 +233,9 @@ const Board = () => {
     const board = document.getElementById("board");
 
     function keyDownEvent(e) {
+      if (e.code == "ArrowUp" || e.code == "ArrowDown") {
+        e.preventDefault();
+      }
       if (e.code == "ArrowUp") {
         goTop();
         isGameOverFunc();
@@ -273,18 +276,18 @@ const Board = () => {
       touchEndX = e.changedTouches[0].clientX;
       touchEndY = e.changedTouches[0].clientY;
       if (Math.abs(touchStartX - touchEndX) >= Math.abs(touchStartY - touchEndY)) {
-        if (touchStartX - touchEndX > 0) {
+        if (touchStartX - touchEndX > 0 && touchStartX - touchEndX > 20) {
           goLeft();
           isGameOverFunc();
-        } else {
+        } else if (touchStartX - touchEndX < 0 && touchStartX - touchEndX < -20) {
           goRight();
           isGameOverFunc();
         }
       } else {
-        if (touchStartY - touchEndY > 0) {
+        if (touchStartY - touchEndY > 0 && touchStartY - touchEndY > 20) {
           goTop();
           isGameOverFunc();
-        } else {
+        } else if (touchStartY - touchEndY < 0 && touchStartY - touchEndY < -20) {
           goBottom();
           isGameOverFunc();
         }
@@ -346,10 +349,11 @@ const Board = () => {
 
   return (
     <>
-      <div className="flex flex-col w-fit mx-auto px-4 py-10">
-        <SetGridCellsNum cellsNum={cellsNum} setCellsNum={setCellsNum} />
+      <div className="flex flex-col w-full md:max-w-[464px] mx-auto px-4 box-content py-10">
+        {/* <SetGridCellsNum cellsNum={cellsNum} setCellsNum={setCellsNum} /> */}
+        {/* <div className="mb-4"></div> */}
         <Score score={score} bestScore={bestScore} />
-        <div className="mb-10"></div>
+        <div className="mb-4"></div>
         <NewGame restartGame={restartGame} />
         <div className="mb-6"></div>
         <div
@@ -358,7 +362,7 @@ const Board = () => {
             gridTemplateColumns: `repeat(${cellsNum},minmax(0,1fr))`,
             gridTemplateRows: `repeat(${cellsNum},minmax(0,1fr))`,
           }}
-          className="bg-[#bbada0] min-w-max touch-none relative rounded-xl h-fit w-fit grid p-4 gap-2 md:gap-4">
+          className="bg-[#bbada0] min-w-max touch-none relative rounded-xl h-fit w-full grid p-4 gap-2 md:gap-4">
           {isGameOver && <GameOver restartGame={restartGame} />}
           {isUserWin.isWin && <YouWin restartGame={restartGame} setIsUserWin={setIsUserWin} />}
 
@@ -367,11 +371,11 @@ const Board = () => {
           {activeCells.map((item) => {
             const styles = getStyles(item.value, windowDimensions.width);
 
-            let translateX = item.colIndex * 112;
-            let translateY = item.rowIndex * 112;
+            let translateX = "calc(" + item.colIndex * 100 + "% + " + item.colIndex * 16 + "px)";
+            let translateY = "calc(" + item.rowIndex * 100 + "% + " + item.rowIndex * 16 + "px)";
             if (windowDimensions.width < 768) {
-              translateX = item.colIndex * 72;
-              translateY = item.rowIndex * 72;
+              translateX = "calc(" + item.colIndex * 100 + "% + " + item.colIndex * 8 + "px)";
+              translateY = "calc(" + item.rowIndex * 100 + "% + " + item.rowIndex * 8 + "px)";
             }
 
             if (item.value != 0) {
@@ -396,13 +400,14 @@ const Board = () => {
                       y: { duration: 0.1 },
                     },
                   }}
-                  className={`md:w-24 w-16 h-16 absolute z-10 left-4 top-4 md:h-24 rounded-lg grid place-items-center font-bold`}>
+                  className={`w-[calc(100%/4-14px)] md:w-[calc(100%/4-20px)] aspect-square absolute z-10 left-4 top-4 rounded-lg grid place-items-center font-bold`}>
                   {item.value}
                 </motion.div>
               );
             }
           })}
         </div>
+        <div className="mb-10"></div>
         <ArrowKeysUi />
       </div>
     </>
