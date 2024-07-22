@@ -8,7 +8,7 @@ const EmptyCells = ({ arr }) => {
           return (
             <div
               key={rowIndex + "" + index}
-              className="w-full aspect-square bg-[#eee4da59] rounded-lg grid transition-all place-items-center font-bold"></div>
+              className="w-full aspect-square bg-thirdCement rounded-lg grid transition-all place-items-center font-bold"></div>
           );
         });
       })}

@@ -371,7 +371,7 @@ const Board = () => {
         <SetGridCellsNum cellsNum={cellsNum} setCellsNum={setCellsNum} />
         <div className="mb-4"></div>
         <div className="flex gap-2 justify-between">
-          <div className="md:text-[80px] text-[50px] font-bold text-[#776e65] leading-[0.7]">2048</div>
+          <div className="md:text-[80px] text-[50px] font-bold text-mainColor leading-[0.7]">2048</div>
           <div>
             <Score score={score} bestScore={bestScore} />
             <div className="mb-4"></div>
@@ -385,7 +385,7 @@ const Board = () => {
             gridTemplateColumns: `repeat(${cellsNum},minmax(0,1fr))`,
             gridTemplateRows: `repeat(${cellsNum},minmax(0,1fr))`,
           }}
-          className="bg-[#bbada0] min-w-max touch-none relative rounded-xl h-fit w-full grid p-4 gap-2 md:gap-4">
+          className="bg-secondColor min-w-max touch-none relative rounded-xl h-fit w-full grid p-4 gap-2 md:gap-4">
           {isGameOver && <GameOver restartGame={restartGame} />}
           {isUserWin.isWin && <YouWin restartGame={restartGame} setIsUserWin={setIsUserWin} />}
 

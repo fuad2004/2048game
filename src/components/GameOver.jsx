@@ -7,8 +7,7 @@ const GameOver = ({ restartGame }) => {
         <div className="text-3xl md:text-6xl font-semibold">Game Over!</div>
         <button
           onClick={restartGame}
-          className="text-xl text-white w-fit hover:bg-[#776555] bg-[#8f7a66] font-semibold rounded py-1 px-4"
-        >
+          className="text-xl text-white w-fit hover:bg-secondCement bg-cement font-semibold rounded py-1 px-4">
           Try again
         </button>
       </div>
