@@ -26,6 +26,7 @@ const Board = () => {
   const [isUserWin, setIsUserWin] = useState({ limit: 2048, isWin: false });
   const [score, setScore] = useState(0);
   const [bestScore, setBestScore] = useState(0);
+  const [isKeyActive, setIsKeyActive] = useState({ key: "", active: false });
 
   function getRowLeft(arr) {
     let temp = -2;
@@ -330,6 +331,23 @@ const Board = () => {
     }
   }, []);
 
+  useEffect(() => {
+    function keyDown(e) {
+      setIsKeyActive({ key: e.code, active: true });
+    }
+    function keyUp() {
+      setIsKeyActive({ key: "", active: false });
+    }
+
+    document.addEventListener("keydown", keyDown);
+    document.addEventListener("keyup", keyUp);
+
+    return () => {
+      document.removeEventListener("keydown", keyDown);
+      document.removeEventListener("keyu;", keyUp);
+    };
+  }, []);
+
   useLayoutEffect(() => {
     const bestScore = localStorage.getItem("bestScore");
     if (bestScore == undefined) {
@@ -350,11 +368,16 @@ const Board = () => {
   return (
     <>
       <div className="flex flex-col w-full md:max-w-[464px] mx-auto px-4 box-content py-10">
-        {/* <SetGridCellsNum cellsNum={cellsNum} setCellsNum={setCellsNum} /> */}
-        {/* <div className="mb-4"></div> */}
-        <Score score={score} bestScore={bestScore} />
+        <SetGridCellsNum cellsNum={cellsNum} setCellsNum={setCellsNum} />
         <div className="mb-4"></div>
-        <NewGame restartGame={restartGame} />
+        <div className="flex gap-2 justify-between">
+          <div className="md:text-[80px] text-[50px] font-bold text-[#776e65] leading-[0.7]">2048</div>
+          <div>
+            <Score score={score} bestScore={bestScore} />
+            <div className="mb-4"></div>
+            <NewGame restartGame={restartGame} />
+          </div>
+        </div>
         <div className="mb-6"></div>
         <div
           id="board"
@@ -369,7 +392,7 @@ const Board = () => {
           <EmptyCells arr={arr} />
 
           {activeCells.map((item) => {
-            const styles = getStyles(item.value, windowDimensions.width);
+            const styles = getStyles(item.value, windowDimensions.width, cellsNum);
 
             let translateX = "calc(" + item.colIndex * 100 + "% + " + item.colIndex * 16 + "px)";
             let translateY = "calc(" + item.rowIndex * 100 + "% + " + item.rowIndex * 16 + "px)";
@@ -408,7 +431,7 @@ const Board = () => {
           })}
         </div>
         <div className="mb-10"></div>
-        <ArrowKeysUi />
+        <ArrowKeysUi isKeyActive={isKeyActive} />
       </div>
     </>
   );

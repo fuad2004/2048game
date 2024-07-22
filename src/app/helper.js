@@ -1,8 +1,22 @@
-export function getStyles(value, width) {
+export function getStyles(value, windowDimensionsWidth, cellsNum) {
   let fontSize = 48;
-  if (width < 768) {
+  let width = null;
+  if (windowDimensionsWidth < 768) {
     fontSize = 40;
+  } else {
+    width = `calc(100% / ${cellsNum} - ${cellsNum + 1} * 16px / ${cellsNum})`;
   }
+
+  if (cellsNum == 5) {
+    fontSize -= 4;
+  } else if (cellsNum == 6) {
+    fontSize -= 12;
+  } else if (cellsNum == 7) {
+    fontSize -= 16;
+  } else if (cellsNum == 8) {
+    fontSize -= 24;
+  }
+
   let backgroundColor = "#eee4da59";
   let color = "#776e65";
   switch (value) {
@@ -67,5 +81,6 @@ export function getStyles(value, width) {
     backgroundColor,
     color,
     fontSize,
+    width,
   };
 }

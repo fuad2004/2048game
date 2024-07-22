@@ -4,7 +4,7 @@ import React, { useState } from "react";
 const SetGridCellsNum = ({ cellsNum, setCellsNum }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="flex justify-end">
+    <div className="md:flex hidden justify-end">
       <div className="group relative">
         <div
           onClick={() => setIsOpen((prev) => !prev)}
