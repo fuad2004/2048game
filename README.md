@@ -30,7 +30,3 @@ Open your browser at http://localhost:3000 and have fun!
 ## 🎨 Design
 
 The design of this game is inspired by the original 2048 game, available at [2048 Game](https://play2048.co/).
-
-## 💡 License
-
-MIT License – use it, enjoy it, and share it!
