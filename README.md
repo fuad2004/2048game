@@ -1,7 +1,6 @@
 # 2048 Game
 
-Hi there! I'm Fuad, and I’m excited to present my 2048 game project. 🎉 This classic puzzle game, built with Next.js and React, is a fun way to showcase my web development skills.
-https://2048game-fd.vercel.app/
+Hi there! I'm Fuad, and I’m excited to present my 2048 game project. 🎉 This classic puzzle game, built with Next.js and React, is a fun way to showcase my web development skills. Check it out [here](https://2048game-fd.vercel.app/)!
 
 ## 🚀 Get Started
 
